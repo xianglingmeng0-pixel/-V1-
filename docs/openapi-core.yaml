@@ -1,0 +1,537 @@
+openapi: 3.1.0
+info:
+  title: 研迹学生—导师系统核心 API
+  version: 1.0.0
+  description: 月度成果提交、版本管理和导师审核的核心接口契约。
+servers:
+  - url: /api/v1
+security:
+  - sessionCookie: []
+tags:
+  - name: Me
+  - name: Files
+  - name: MonthlyCycles
+  - name: MonthlySubmissions
+paths:
+  /me:
+    get:
+      tags: [Me]
+      operationId: getMe
+      summary: 获取当前用户、角色与数据范围
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MeResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /files/upload-intents:
+    post:
+      tags: [Files]
+      operationId: createUploadIntent
+      summary: 创建文件直传意图
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateUploadIntentRequest"
+      responses:
+        "201":
+          description: 已创建
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UploadIntentResponse"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+  /files/{fileId}/complete:
+    post:
+      tags: [Files]
+      operationId: completeUpload
+      summary: 完成上传并触发文件校验
+      parameters:
+        - $ref: "#/components/parameters/FileId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [sha256]
+              properties:
+                sha256:
+                  type: string
+                  pattern: "^[a-fA-F0-9]{64}$"
+      responses:
+        "200":
+          description: 文件已确认
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FileResponse"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+  /monthly-cycles/current:
+    get:
+      tags: [MonthlyCycles]
+      operationId: getCurrentMonthlyCycle
+      summary: 获取当前可见的月度周期
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MonthlyCycleResponse"
+  /monthly-cycles/{cycleId}/publish-preview:
+    get:
+      tags: [MonthlyCycles]
+      operationId: previewMonthlyCyclePublish
+      summary: 预览周期发布影响
+      parameters:
+        - $ref: "#/components/parameters/CycleId"
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublishPreviewResponse"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+  /monthly-cycles/{cycleId}/publish:
+    post:
+      tags: [MonthlyCycles]
+      operationId: publishMonthlyCycle
+      summary: 发布周期并生成学生成果单
+      parameters:
+        - $ref: "#/components/parameters/CycleId"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      responses:
+        "202":
+          description: 已接受
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MonthlyCycleResponse"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /monthly-submissions:
+    get:
+      tags: [MonthlySubmissions]
+      operationId: listMonthlySubmissions
+      summary: 按当前权限查询月报
+      parameters:
+        - name: cycle_id
+          in: query
+          schema: { type: integer, format: int64 }
+        - name: status
+          in: query
+          schema:
+            $ref: "#/components/schemas/SubmissionStatus"
+        - name: student_id
+          in: query
+          schema: { type: integer, format: int64 }
+        - name: mentor_id
+          in: query
+          schema: { type: integer, format: int64 }
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PageSize"
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubmissionListResponse"
+  /monthly-submissions/{submissionId}:
+    get:
+      tags: [MonthlySubmissions]
+      operationId: getMonthlySubmission
+      summary: 获取月报、版本及审核历史
+      parameters:
+        - $ref: "#/components/parameters/SubmissionId"
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubmissionResponse"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /monthly-submissions/{submissionId}/versions:
+    post:
+      tags: [MonthlySubmissions]
+      operationId: createSubmissionVersion
+      summary: 学生正式提交月报新版本
+      parameters:
+        - $ref: "#/components/parameters/SubmissionId"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSubmissionVersionRequest"
+      responses:
+        "201":
+          description: 版本已创建
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubmissionResponse"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+  /monthly-submissions/{submissionId}/review-start:
+    post:
+      tags: [MonthlySubmissions]
+      operationId: startSubmissionReview
+      summary: 导师开始审核
+      parameters:
+        - $ref: "#/components/parameters/SubmissionId"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [lock_version]
+              properties:
+                lock_version:
+                  type: integer
+                  minimum: 0
+      responses:
+        "200":
+          description: 已进入审核中
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubmissionResponse"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /monthly-submissions/{submissionId}/reviews:
+    post:
+      tags: [MonthlySubmissions]
+      operationId: reviewMonthlySubmission
+      summary: 评论、退回、通过或改分
+      parameters:
+        - $ref: "#/components/parameters/SubmissionId"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateReviewRequest"
+      responses:
+        "201":
+          description: 审核已记录
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubmissionResponse"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: yj_session
+  parameters:
+    FileId:
+      name: fileId
+      in: path
+      required: true
+      schema: { type: integer, format: int64 }
+    CycleId:
+      name: cycleId
+      in: path
+      required: true
+      schema: { type: integer, format: int64 }
+    SubmissionId:
+      name: submissionId
+      in: path
+      required: true
+      schema: { type: integer, format: int64 }
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: 客户端为一次逻辑操作生成并在重试时复用的UUID。
+      schema: { type: string, format: uuid }
+    Page:
+      name: page
+      in: query
+      schema: { type: integer, minimum: 1, default: 1 }
+    PageSize:
+      name: page_size
+      in: query
+      schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+  responses:
+    Unauthorized:
+      description: 未登录
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorResponse" }
+    Forbidden:
+      description: 无权访问该资源或数据范围
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorResponse" }
+    NotFound:
+      description: 资源不存在
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorResponse" }
+    Conflict:
+      description: 状态或乐观锁冲突
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorResponse" }
+    ValidationError:
+      description: 参数或业务校验失败
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorResponse" }
+  schemas:
+    SubmissionStatus:
+      type: string
+      enum: [PENDING, SUBMITTED, REVIEWING, RETURNED, APPROVED, ARCHIVED]
+    Role:
+      type: string
+      enum: [STUDENT, MENTOR, DEAN, ADMIN]
+    UserSummary:
+      type: object
+      required: [id, user_no, name]
+      properties:
+        id: { type: integer, format: int64 }
+        user_no: { type: string }
+        name: { type: string }
+        avatar_url: { type: [string, "null"], format: uri }
+    MeResponse:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          allOf:
+            - $ref: "#/components/schemas/UserSummary"
+            - type: object
+              required: [roles, current_role]
+              properties:
+                roles:
+                  type: array
+                  items: { $ref: "#/components/schemas/Role" }
+                current_role: { $ref: "#/components/schemas/Role" }
+        meta: { $ref: "#/components/schemas/ResponseMeta" }
+    CreateUploadIntentRequest:
+      type: object
+      required: [file_name, mime_type, file_size, sha256]
+      properties:
+        file_name: { type: string, maxLength: 500 }
+        mime_type: { type: string, maxLength: 150 }
+        file_size: { type: integer, format: int64, minimum: 1 }
+        sha256: { type: string, pattern: "^[a-fA-F0-9]{64}$" }
+    UploadIntentResponse:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: object
+          required: [file_id, upload_url, expires_at]
+          properties:
+            file_id: { type: integer, format: int64 }
+            upload_url: { type: string, format: uri }
+            method: { type: string, enum: [PUT] }
+            headers: { type: object, additionalProperties: { type: string } }
+            expires_at: { type: string, format: date-time }
+        meta: { $ref: "#/components/schemas/ResponseMeta" }
+    FileResponse:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: object
+          required: [id, original_name, mime_type, file_size, status]
+          properties:
+            id: { type: integer, format: int64 }
+            original_name: { type: string }
+            mime_type: { type: string }
+            file_size: { type: integer, format: int64 }
+            status: { type: string, enum: [READY] }
+        meta: { $ref: "#/components/schemas/ResponseMeta" }
+    MonthlyCycle:
+      type: object
+      required:
+        [id, cycle_year, cycle_month, title, open_at, deadline_at, status]
+      properties:
+        id: { type: integer, format: int64 }
+        cycle_year: { type: integer }
+        cycle_month: { type: integer, minimum: 1, maximum: 12 }
+        title: { type: string }
+        open_at: { type: string, format: date-time }
+        remind_at: { type: string, format: date-time }
+        deadline_at: { type: string, format: date-time }
+        review_deadline_at: { type: [string, "null"], format: date-time }
+        allow_late: { type: boolean }
+        late_deadline_at: { type: [string, "null"], format: date-time }
+        status:
+          { type: string, enum: [DRAFT, SCHEDULED, OPEN, CLOSED, ARCHIVED] }
+    MonthlyCycleResponse:
+      type: object
+      required: [data, meta]
+      properties:
+        data: { $ref: "#/components/schemas/MonthlyCycle" }
+        meta: { $ref: "#/components/schemas/ResponseMeta" }
+    PublishPreviewResponse:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: object
+          required: [eligible_students, blocking_issues]
+          properties:
+            eligible_students: { type: integer, minimum: 0 }
+            submissions_to_create: { type: integer, minimum: 0 }
+            blocking_issues:
+              type: array
+              items:
+                type: object
+                required: [code, count]
+                properties:
+                  code:
+                    {
+                      type: string,
+                      enum:
+                        [MISSING_MENTOR, DISABLED_ACCOUNT, DUPLICATE_RELATION],
+                    }
+                  count: { type: integer, minimum: 0 }
+        meta: { $ref: "#/components/schemas/ResponseMeta" }
+    FileReference:
+      type: object
+      required: [file_id, file_role]
+      properties:
+        file_id: { type: integer, format: int64 }
+        file_role: { type: string, enum: [MAIN_REPORT, ATTACHMENT, EVIDENCE] }
+    CreateSubmissionVersionRequest:
+      type: object
+      required: [lock_version, title, monthly_summary, next_plan, files]
+      properties:
+        lock_version: { type: integer, minimum: 0 }
+        title: { type: string, maxLength: 200 }
+        monthly_summary: { type: string, minLength: 1 }
+        achievements: { type: [string, "null"] }
+        difficulties: { type: [string, "null"] }
+        next_plan: { type: string, minLength: 1 }
+        self_progress: { type: [integer, "null"], minimum: 0, maximum: 100 }
+        change_note: { type: [string, "null"] }
+        files:
+          type: array
+          minItems: 1
+          items: { $ref: "#/components/schemas/FileReference" }
+    CreateReviewRequest:
+      type: object
+      required: [lock_version, version_id, action]
+      properties:
+        lock_version: { type: integer, minimum: 0 }
+        version_id: { type: integer, format: int64 }
+        action: { type: string, enum: [COMMENT, RETURN, APPROVE, RESCORE] }
+        comment: { type: [string, "null"] }
+        score: { type: [number, "null"], minimum: 0, maximum: 100 }
+      allOf:
+        - if:
+            properties:
+              action: { const: RETURN }
+          then:
+            required: [comment]
+    SubmissionVersion:
+      type: object
+      required:
+        [id, version_no, title, monthly_summary, next_plan, submitted_at]
+      properties:
+        id: { type: integer, format: int64 }
+        version_no: { type: integer, minimum: 1 }
+        title: { type: string }
+        monthly_summary: { type: string }
+        achievements: { type: [string, "null"] }
+        difficulties: { type: [string, "null"] }
+        next_plan: { type: string }
+        self_progress: { type: [integer, "null"] }
+        submitted_at: { type: string, format: date-time }
+    Submission:
+      type: object
+      required: [id, cycle_id, student, mentor, status, lock_version, versions]
+      properties:
+        id: { type: integer, format: int64 }
+        cycle_id: { type: integer, format: int64 }
+        student: { $ref: "#/components/schemas/UserSummary" }
+        mentor: { $ref: "#/components/schemas/UserSummary" }
+        status: { $ref: "#/components/schemas/SubmissionStatus" }
+        display_status: { type: string }
+        lock_version: { type: integer, minimum: 0 }
+        final_score: { type: [number, "null"] }
+        is_late: { type: boolean }
+        first_submitted_at: { type: [string, "null"], format: date-time }
+        final_submitted_at: { type: [string, "null"], format: date-time }
+        versions:
+          type: array
+          items: { $ref: "#/components/schemas/SubmissionVersion" }
+    SubmissionResponse:
+      type: object
+      required: [data, meta]
+      properties:
+        data: { $ref: "#/components/schemas/Submission" }
+        meta: { $ref: "#/components/schemas/ResponseMeta" }
+    SubmissionListResponse:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: array
+          items: { $ref: "#/components/schemas/Submission" }
+        meta:
+          allOf:
+            - $ref: "#/components/schemas/ResponseMeta"
+            - type: object
+              properties:
+                pagination:
+                  type: object
+                  required: [page, page_size, total]
+                  properties:
+                    page: { type: integer }
+                    page_size: { type: integer }
+                    total: { type: integer }
+    ResponseMeta:
+      type: object
+      required: [request_id]
+      properties:
+        request_id: { type: string }
+    ErrorResponse:
+      type: object
+      required: [error, meta]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code: { type: string }
+            message: { type: string }
+            details: { type: object, additionalProperties: true }
+        meta: { $ref: "#/components/schemas/ResponseMeta" }

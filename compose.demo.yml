@@ -1,0 +1,113 @@
+name: yanji-demo
+
+x-app-image: &app-image
+  image: yanji-demo-app:local
+  build:
+    context: .
+    dockerfile: Dockerfile.demo
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: yanji
+      POSTGRES_USER: yanji
+      POSTGRES_PASSWORD: yanji_demo_password
+      TZ: Asia/Shanghai
+    volumes:
+      - demo-postgres-data:/var/lib/postgresql/data
+      - ./infra/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U yanji -d yanji"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    restart: unless-stopped
+
+  redis:
+    image: redis:8-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - demo-redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: yanji_minio
+      MINIO_ROOT_PASSWORD: yanji_minio_password
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - demo-minio-data:/data
+    restart: unless-stopped
+
+  api:
+    <<: *app-image
+    command: ["pnpm", "--filter", "@yanji/api", "start"]
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      WEB_ORIGIN: http://localhost:3000
+      DEMO_AUTH_ENABLED: "true"
+      DEMO_STUDENT_ID: "1"
+      DEMO_MENTOR_ID: "2"
+      DEMO_DEAN_ID: "4"
+      DATABASE_URL: postgresql://yanji:yanji_demo_password@postgres:5432/yanji
+      REDIS_URL: redis://redis:6379
+      S3_ENDPOINT: http://minio:9000
+      S3_REGION: us-east-1
+      S3_BUCKET: yanji-documents
+      S3_ACCESS_KEY: yanji_minio
+      S3_SECRET_KEY: yanji_minio_password
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--quiet",
+          "--tries=1",
+          "--spider",
+          "http://localhost:3001/health",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    restart: unless-stopped
+
+  web:
+    <<: *app-image
+    command: ["pnpm", "--filter", "@yanji/web", "start", "-H", "0.0.0.0"]
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      API_INTERNAL_URL: http://api:3001/api/v1
+      NEXT_PUBLIC_API_URL: http://localhost:3001/api/v1
+      DEMO_STUDENT_ID: "1"
+      DEMO_MENTOR_ID: "2"
+      DEMO_DEAN_ID: "4"
+    ports:
+      - "3000:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  demo-postgres-data:
+  demo-redis-data:
+  demo-minio-data:

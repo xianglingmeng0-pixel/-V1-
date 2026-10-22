@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: yanji
+          POSTGRES_USER: yanji
+          POSTGRES_PASSWORD: yanji_ci_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U yanji -d yanji"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.28.5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm audit:prod
+      - name: Validate database schema and seed
+        env:
+          PGPASSWORD: yanji_ci_password
+        run: |
+          psql -h localhost -U yanji -d yanji -v ON_ERROR_STOP=1 -f infra/postgres/init/001-schema.sql
+          psql -h localhost -U yanji -d yanji -v ON_ERROR_STOP=1 -f infra/postgres/init/002-dev-seed.sql
+      - run: pnpm format:check
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build

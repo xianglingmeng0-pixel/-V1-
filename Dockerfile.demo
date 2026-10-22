@@ -1,0 +1,25 @@
+FROM node:24.22.0-alpine AS builder
+
+RUN corepack enable && corepack prepare pnpm@11.28.5 --activate
+WORKDIR /app
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json ./
+COPY packages/contracts/package.json packages/contracts/package.json
+COPY apps/api/package.json apps/api/package.json
+COPY apps/web/package.json apps/web/package.json
+RUN pnpm install --frozen-lockfile
+
+COPY packages/contracts packages/contracts
+COPY apps/api apps/api
+COPY apps/web apps/web
+RUN pnpm build
+
+FROM node:24.22.0-alpine AS runtime
+
+RUN corepack enable && corepack prepare pnpm@11.28.5 --activate
+WORKDIR /app
+ENV NODE_ENV=production
+
+COPY --from=builder /app /app
+
+EXPOSE 3000 3001

@@ -1,0 +1,16 @@
+packages:
+  - apps/*
+  - packages/*
+
+minimumReleaseAge: 1440
+minimumReleaseAgeExclude:
+  - next@16.4.0
+  - react@19.3.0
+  - react-dom@19.3.0
+
+allowBuilds:
+  sharp: true
+
+overrides:
+  fastify: 5.12.7
+  webpack: 5.112.0
