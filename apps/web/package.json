@@ -14,7 +14,7 @@
     "@yanji/contracts": "workspace:*",
     "next": "16.4.0",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.1"
   },
   "devDependencies": {
     "@types/node": "^24.10.0",
