@@ -3,7 +3,11 @@ import { AppHeader } from "../../../_components/app-header";
 import { getStudentDashboard } from "../../../../lib/api";
 import { ReportUploader } from "./report-uploader";
 
-export const dynamic = "force-dynamic";
+export const dynamicParams = false;
+
+export function generateStaticParams() {
+  return [{ id: "1" }];
+}
 
 function formatDeadline(value: string): string {
   return new Intl.DateTimeFormat("zh-CN", {

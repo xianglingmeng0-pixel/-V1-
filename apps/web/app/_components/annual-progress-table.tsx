@@ -53,6 +53,11 @@ export function AnnualProgressTable({ data }: { data: AnnualProgress }) {
             未开始
           </span>
         </div>
+        {!isDean ? (
+          <p className="annual-action-tip">
+            点击绿色月份，即可查看该学生当月提交的报告和导师点评。
+          </p>
+        ) : null}
         <section className="annual-table-card">
           <div className="responsive-table">
             <table className="annual-table">
@@ -73,21 +78,38 @@ export function AnnualProgressTable({ data }: { data: AnnualProgress }) {
                       <small>{student.student_no}</small>
                     </td>
                     {isDean ? <td>{student.mentor_name}</td> : null}
-                    {student.months.map((item) => (
-                      <td key={item.month}>
-                        <span
-                          className={`progress-cell ${item.status.toLowerCase()}`}
-                          title={`${item.month}月：${statusLabels[item.status]}`}
-                          aria-label={`${item.month}月${statusLabels[item.status]}`}
-                        >
-                          {item.status === "COMPLETE"
-                            ? "✓"
-                            : item.status === "MISSED"
-                              ? "!"
-                              : ""}
-                        </span>
-                      </td>
-                    ))}
+                    {student.months.map((item) => {
+                      const canView = !isDean && item.status === "COMPLETE";
+                      const label = `${student.student_name}${item.month}月：${statusLabels[item.status]}`;
+                      const content =
+                        item.status === "COMPLETE"
+                          ? "✓"
+                          : item.status === "MISSED"
+                            ? "!"
+                            : "";
+                      return (
+                        <td key={item.month}>
+                          {canView ? (
+                            <a
+                              className="progress-cell complete progress-link"
+                              href={`${base}/history/${student.student_id}-${data.year}-${item.month}`}
+                              title={`${label}，点击查看报告与点评`}
+                              aria-label={`${label}，点击查看报告与点评`}
+                            >
+                              {content}
+                            </a>
+                          ) : (
+                            <span
+                              className={`progress-cell ${item.status.toLowerCase()}`}
+                              title={label}
+                              aria-label={label}
+                            >
+                              {content}
+                            </span>
+                          )}
+                        </td>
+                      );
+                    })}
                   </tr>
                 ))}
               </tbody>
@@ -95,7 +117,7 @@ export function AnnualProgressTable({ data }: { data: AnnualProgress }) {
           </div>
         </section>
         <p className="annual-footnote">
-          绿色表示已提交；红色表示超过补交时间仍未提交。查看状态只在月报工作台显示，不增加老师工作量。
+          绿色表示已提交，可点击追溯报告与点评；红色表示超过补交时间仍未提交。
         </p>
       </main>
     </div>

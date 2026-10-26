@@ -53,7 +53,7 @@ export function createDemoStudentDashboard(): StudentDashboard {
   };
 }
 
-const students = [
+export const demoStudents = [
   [1, "20260001", "林晓雨"],
   [5, "20260002", "陈思远"],
   [6, "20260003", "赵一诺"],
@@ -62,6 +62,141 @@ const students = [
   [9, "20260006", "吴桐"],
 ] as const;
 
+type DemoMonthStatus =
+  AnnualProgress["students"][number]["months"][number]["status"];
+
+export type DemoHistoricalReport = {
+  student: {
+    id: number;
+    studentNo: string;
+    name: string;
+  };
+  year: number;
+  month: number;
+  status: DemoMonthStatus;
+  title: string;
+  summary: string;
+  achievements: string[];
+  nextPlan: string;
+  file: {
+    name: string;
+    size: string;
+  };
+  submittedAt: string | null;
+  reviewedAt: string | null;
+  comments: Array<{
+    author: string;
+    content: string;
+    createdAt: string;
+  }>;
+};
+
+const researchTracks = [
+  "多模态学习实验",
+  "科学计算模型",
+  "医学图像分割",
+  "知识图谱构建",
+  "时序数据预测",
+  "智能优化算法",
+] as const;
+
+const monthlyMilestones = [
+  "研究方向梳理与年度计划",
+  "数据集整理与预处理",
+  "基线模型复现",
+  "核心模块设计与实现",
+  "第一轮对照实验",
+  "误差分析与参数优化",
+  "消融实验设计",
+  "中期结果整理",
+  "补充实验与稳定性验证",
+  "论文框架与图表整理",
+  "论文初稿修改",
+  "年度成果总结",
+] as const;
+
+const mentorComments = [
+  "本月进展清晰，建议下阶段把基线参数和数据划分方式写得更完整，便于后续复现实验。",
+  "实验结果已经形成对比，下一步重点分析误差来源，并补充一组关键消融实验。",
+  "整体工作按计划推进。建议把图表结论进一步量化，并在下月报告中说明改进效果。",
+] as const;
+
+function getDemoMonthStatus(
+  studentIndex: number,
+  month: number,
+  currentMonth: number,
+): DemoMonthStatus {
+  let status: DemoMonthStatus =
+    month < currentMonth
+      ? "COMPLETE"
+      : month === currentMonth
+        ? studentIndex < 3
+          ? "COMPLETE"
+          : "PENDING"
+        : "FUTURE";
+  if ((studentIndex === 1 || studentIndex === 4) && month === 8) {
+    status = "MISSED";
+  }
+  if (studentIndex === 3 && month === 6) status = "MISSED";
+  return status;
+}
+
+export function createDemoHistoricalReport(
+  studentId: number,
+  year: number,
+  month: number,
+): DemoHistoricalReport | null {
+  const now = new Date();
+  const studentIndex = demoStudents.findIndex(([id]) => id === studentId);
+  const student = demoStudents[studentIndex];
+  if (!student || year !== now.getFullYear() || month < 1 || month > 12) {
+    return null;
+  }
+
+  const status = getDemoMonthStatus(studentIndex, month, now.getMonth() + 1);
+  const [id, studentNo, name] = student;
+  const track = researchTracks[studentIndex] ?? researchTracks[0];
+  const milestone = monthlyMilestones[month - 1] ?? monthlyMilestones[0];
+  const submittedAt = new Date(
+    `${year}-${String(month).padStart(2, "0")}-${String(26 + (studentIndex % 3)).padStart(2, "0")}T20:30:00+08:00`,
+  );
+  const reviewedAt = new Date(submittedAt.getTime() + 18 * 3_600_000);
+
+  return {
+    student: { id, studentNo, name },
+    year,
+    month,
+    status,
+    title: `${track}：${milestone}`,
+    summary: `本月围绕“${track}”推进${milestone}，完成了计划内的资料整理、实验验证和阶段性结果汇总。`,
+    achievements: [
+      `完成${milestone}的主要工作并整理过程记录`,
+      "对关键实验结果进行复核，形成可追溯的对照表",
+      "更新研究日志与问题清单，明确下一阶段优先事项",
+    ],
+    nextPlan: `继续推进${track}，根据导师意见补充对照实验并完善结果分析。`,
+    file: {
+      name: `${name}-${year}年${month}月科研进展.pdf`,
+      size: `${(2.1 + ((studentIndex + month) % 7) * 0.3).toFixed(1)} MB`,
+    },
+    submittedAt: status === "COMPLETE" ? submittedAt.toISOString() : null,
+    reviewedAt: status === "COMPLETE" ? reviewedAt.toISOString() : null,
+    comments:
+      status === "COMPLETE"
+        ? [
+            {
+              author: "龚老师",
+              content:
+                mentorComments[
+                  (studentIndex + month) % mentorComments.length
+                ] ?? mentorComments[0],
+              createdAt: reviewedAt.toISOString(),
+            },
+          ]
+        : [],
+  };
+}
+
 export function createDemoTeacherDashboard(
   role: "MENTOR" | "DEAN",
 ): TeacherDashboard {
@@ -69,7 +204,7 @@ export function createDemoTeacherDashboard(
   const month = now.getMonth() + 1;
   const deadline = monthDeadline(now.getFullYear(), month);
   const graceDeadline = new Date(deadline.getTime() + 86_400_000);
-  const reports: TeacherDashboard["reports"] = students.map(
+  const reports: TeacherDashboard["reports"] = demoStudents.map(
     ([studentId, studentNo, studentName], index) => {
       const submitted = index < 3;
       return {
@@ -103,7 +238,7 @@ export function createDemoTeacherDashboard(
     year: now.getFullYear(),
     month,
     summary: {
-      student_count: students.length,
+      student_count: demoStudents.length,
       submitted_count: reports.filter(
         (report) => report.completion_status === "COMPLETE",
       ).length,
@@ -132,25 +267,20 @@ export function createDemoAnnualProgress(
       role,
     },
     year: now.getFullYear(),
-    students: students.map(([studentId, studentNo, studentName], index) => ({
-      student_id: studentId,
-      student_no: studentNo,
-      student_name: studentName,
-      mentor_name: "龚老师",
-      months: Array.from({ length: 12 }, (_, monthIndex) => {
-        const month = monthIndex + 1;
-        let status: "COMPLETE" | "MISSED" | "PENDING" | "FUTURE" =
-          month < currentMonth
-            ? "COMPLETE"
-            : month === currentMonth
-              ? index < 3
-                ? "COMPLETE"
-                : "PENDING"
-              : "FUTURE";
-        if ((index === 1 || index === 4) && month === 8) status = "MISSED";
-        if (index === 3 && month === 6) status = "MISSED";
-        return { month, status };
+    students: demoStudents.map(
+      ([studentId, studentNo, studentName], index) => ({
+        student_id: studentId,
+        student_no: studentNo,
+        student_name: studentName,
+        mentor_name: "龚老师",
+        months: Array.from({ length: 12 }, (_, monthIndex) => {
+          const month = monthIndex + 1;
+          return {
+            month,
+            status: getDemoMonthStatus(index, month, currentMonth),
+          };
+        }),
       }),
-    })),
+    ),
   };
 }

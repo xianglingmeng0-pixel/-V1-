@@ -1,8 +1,6 @@
 import { AppHeader } from "../_components/app-header";
 import { getStudentDashboard } from "../../lib/api";
 
-export const dynamic = "force-dynamic";
-
 function formatDate(value: string): string {
   return new Intl.DateTimeFormat("zh-CN", {
     month: "long",

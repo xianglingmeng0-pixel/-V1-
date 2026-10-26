@@ -14,7 +14,9 @@ import {
 
 const apiUrl = process.env.API_INTERNAL_URL ?? "http://localhost:3001/api/v1";
 const staticDemoMode =
-  process.env.DEMO_STATIC_MODE === "true" || process.env.VERCEL === "1";
+  process.env.DEMO_STATIC_MODE === "true" ||
+  process.env.EDGEONE_STATIC_EXPORT === "true" ||
+  process.env.VERCEL === "1";
 
 export async function getStudentDashboard(): Promise<StudentDashboard> {
   if (staticDemoMode) return createDemoStudentDashboard();

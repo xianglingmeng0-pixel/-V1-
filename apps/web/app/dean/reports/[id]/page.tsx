@@ -1,7 +1,11 @@
 import { ReportDetailPage } from "../../../_components/report-detail-page";
 import { getTeacherDashboard, markSubmissionRead } from "../../../../lib/api";
 
-export const dynamic = "force-dynamic";
+export const dynamicParams = false;
+
+export function generateStaticParams() {
+  return ["101", "102", "103"].map((id) => ({ id }));
+}
 
 export default async function DeanReportPage({
   params,

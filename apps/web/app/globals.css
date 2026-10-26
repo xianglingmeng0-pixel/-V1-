@@ -926,6 +926,15 @@ a {
 .annual-table-card {
   overflow: hidden;
 }
+.annual-action-tip {
+  margin: 0 0 12px;
+  padding: 10px 13px;
+  border: 1px solid #cfe4da;
+  border-radius: 10px;
+  color: var(--brand-dark);
+  background: var(--brand-soft);
+  font-size: 12px;
+}
 .annual-table th,
 .annual-table td {
   min-width: 52px;
@@ -977,6 +986,21 @@ a {
 .progress-cell.complete {
   color: #fff;
   background: #21916c;
+}
+.progress-link {
+  cursor: pointer;
+  box-shadow: 0 0 0 2px rgba(33, 145, 108, 0.12);
+  transition:
+    transform 0.16s ease,
+    box-shadow 0.16s ease,
+    background 0.16s ease;
+}
+.progress-link:hover,
+.progress-link:focus-visible {
+  background: var(--brand-dark);
+  box-shadow: 0 0 0 4px rgba(33, 145, 108, 0.18);
+  outline: 0;
+  transform: translateY(-2px);
 }
 .progress-cell.missed {
   color: #fff;
@@ -1301,6 +1325,50 @@ a {
 .comments-card {
   align-self: start;
   overflow: hidden;
+}
+.history-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin-top: 13px;
+  color: var(--muted);
+  font-size: 11px;
+}
+.history-meta strong {
+  color: var(--ink);
+}
+.history-comment-heading {
+  padding: 20px 20px 12px;
+}
+.history-comment-heading h2 {
+  margin: 5px 0 0;
+  font-size: 18px;
+}
+.history-comment-summary {
+  margin: 0 20px 18px;
+  padding: 12px;
+  border-radius: 10px;
+  color: var(--brand-dark);
+  background: var(--brand-soft);
+  font-size: 11px;
+  line-height: 1.65;
+}
+.history-empty-card {
+  display: grid;
+  min-height: 320px;
+  place-items: center;
+  padding: 40px;
+  text-align: center;
+}
+.history-empty-card strong {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 20px;
+}
+.history-empty-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.7;
 }
 .no-score-label {
   padding: 5px 8px;
