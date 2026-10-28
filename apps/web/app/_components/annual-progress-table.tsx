@@ -53,11 +53,9 @@ export function AnnualProgressTable({ data }: { data: AnnualProgress }) {
             未开始
           </span>
         </div>
-        {!isDean ? (
-          <p className="annual-action-tip">
-            点击绿色月份，即可查看该学生当月提交的报告和导师点评。
-          </p>
-        ) : null}
+        <p className="annual-action-tip">
+          点击绿色月份，即可查看该学生当月提交的报告、提交时间和导师点评。
+        </p>
         <section className="annual-table-card">
           <div className="responsive-table">
             <table className="annual-table">
@@ -79,7 +77,7 @@ export function AnnualProgressTable({ data }: { data: AnnualProgress }) {
                     </td>
                     {isDean ? <td>{student.mentor_name}</td> : null}
                     {student.months.map((item) => {
-                      const canView = !isDean && item.status === "COMPLETE";
+                      const canView = item.status === "COMPLETE";
                       const label = `${student.student_name}${item.month}月：${statusLabels[item.status]}`;
                       const content =
                         item.status === "COMPLETE"
