@@ -16,6 +16,7 @@ export interface TeacherReportRow {
   completion_status: string;
   read_status: string;
   submitted_at: Date | null;
+  mentor_comment: string | null;
   comment_count: number;
 }
 
@@ -64,6 +65,7 @@ export class TeacherDashboardRepository {
          END AS completion_status,
          CASE WHEN reads.submission_id IS NULL THEN 'UNREAD' ELSE 'READ' END AS read_status,
          s.final_submitted_at AS submitted_at,
+         mentor_comment.content AS mentor_comment,
          count(comments.id)::int AS comment_count
        FROM monthly_submissions s
        JOIN monthly_cycles c ON c.id = s.cycle_id
@@ -72,12 +74,23 @@ export class TeacherDashboardRepository {
        LEFT JOIN submission_reads reads
          ON reads.submission_id = s.id AND reads.viewer_id = $1
        LEFT JOIN submission_comments comments ON comments.submission_id = s.id
+         AND comments.author_id = $1
          AND comments.deleted_at IS NULL
+       LEFT JOIN LATERAL (
+         SELECT mentor_comments.content
+         FROM submission_comments mentor_comments
+         WHERE mentor_comments.submission_id = s.id
+           AND mentor_comments.author_id = s.mentor_id
+           AND mentor_comments.deleted_at IS NULL
+         ORDER BY mentor_comments.created_at DESC
+         LIMIT 1
+       ) mentor_comment ON true
        WHERE c.cycle_year = $3
          AND c.cycle_month = $4
          AND ($2 = 'DEAN' OR s.mentor_id = $1)
        GROUP BY s.id, student.id, mentor.name, c.title, c.deadline_at,
-                c.grace_deadline_at, reads.submission_id
+                c.grace_deadline_at, reads.submission_id,
+                mentor_comment.content
        ORDER BY (s.first_submitted_at IS NOT NULL AND reads.submission_id IS NULL) DESC,
                 student.name`,
       [userId, role, year, month],

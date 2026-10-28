@@ -37,6 +37,7 @@ export const teacherDashboardSchema = z.object({
       completion_status: completionStatusSchema,
       read_status: readStatusSchema,
       submitted_at: z.string().datetime({ offset: true }).nullable(),
+      mentor_comment: z.string().nullable(),
       comment_count: z.number().int().nonnegative(),
     }),
   ),

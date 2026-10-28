@@ -853,6 +853,13 @@ a {
 .report-table tr.report-read td:first-child {
   box-shadow: inset 3px 0 var(--brand);
 }
+.report-table td.mentor-comment-cell {
+  min-width: 220px;
+  max-width: 300px;
+  color: #4f5a55;
+  line-height: 1.55;
+  white-space: normal;
+}
 .student-cell {
   display: flex;
   align-items: center;

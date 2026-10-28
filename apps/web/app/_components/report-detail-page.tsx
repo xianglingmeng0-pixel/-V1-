@@ -73,7 +73,9 @@ export function ReportDetailPage({
               role={data.viewer.role}
               initialComment={
                 report.comment_count
-                  ? "内容已查看，建议下月补充实验对照结果。"
+                  ? isDean
+                    ? "整体进展已查看，建议继续保持月度记录，并加强阶段成果的连续性。"
+                    : "内容已查看，建议下月补充实验对照结果。"
                   : undefined
               }
             />

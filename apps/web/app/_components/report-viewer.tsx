@@ -11,6 +11,9 @@ export function ReportViewer({
   submissionId: number;
   role: "MENTOR" | "DEAN";
 }) {
+  const isDean = role === "DEAN";
+  const commentLabel = isDean ? "院长评论" : "导师评论";
+  const avatarText = isDean ? "张" : "龚";
   const [comments, setComments] = useState(
     initialComment ? [initialComment] : ([] as string[]),
   );
@@ -56,9 +59,9 @@ export function ReportViewer({
         <div className="comment-list">
           {comments.map((comment, index) => (
             <article key={`${comment}-${index}`}>
-              <span className="person-avatar small">龚</span>
+              <span className="person-avatar small">{avatarText}</span>
               <div>
-                <strong>导师评论</strong>
+                <strong>{commentLabel}</strong>
                 <p>{comment}</p>
                 <small>刚刚</small>
               </div>

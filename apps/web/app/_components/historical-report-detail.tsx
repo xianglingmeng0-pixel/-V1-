@@ -26,6 +26,7 @@ export function HistoricalReportDetail({
     Number.parseInt(studentIdValue ?? "", 10),
     Number.parseInt(yearValue ?? "", 10),
     Number.parseInt(monthValue ?? "", 10),
+    viewerRole,
   );
   if (!report) notFound();
 
@@ -58,7 +59,7 @@ export function HistoricalReportDetail({
                   <strong>{formatDateTime(report.submittedAt)}</strong>
                 </span>
                 <span>
-                  导师查看时间：
+                  {viewerLabel}查看时间：
                   <strong>{formatDateTime(report.reviewedAt)}</strong>
                 </span>
               </div>
@@ -109,10 +110,10 @@ export function HistoricalReportDetail({
             <aside className="simple-card comments-card">
               <div className="history-comment-heading">
                 <span className="eyebrow">历史记录</span>
-                <h2>导师点评</h2>
+                <h2>{viewerLabel}点评</h2>
               </div>
               <p className="history-comment-summary">
-                这里保留当月报告提交后形成的点评记录，方便后续按月追踪改进情况。
+                {`这里保留${viewerLabel}对当月报告形成的点评记录，方便后续按月追踪改进情况。`}
               </p>
               <div className="comment-list">
                 {report.comments.map((comment) => (
@@ -134,7 +135,7 @@ export function HistoricalReportDetail({
           <section className="simple-card history-empty-card">
             <div>
               <strong>该月未提交成果</strong>
-              <p>没有可查看的报告文件，因此也没有形成导师点评记录。</p>
+              <p>{`没有可查看的报告文件，因此也没有形成${viewerLabel}点评记录。`}</p>
             </div>
           </section>
         )}

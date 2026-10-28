@@ -92,8 +92,9 @@ export function TeacherWorkspace({ data }: { data: TeacherDashboard }) {
                   <th>学生</th>
                   {isDean ? <th>导师</th> : null}
                   <th>提交情况</th>
+                  {isDean ? <th>导师评论</th> : null}
                   <th>查看状态</th>
-                  <th>导师评论</th>
+                  <th>{isDean ? "院长评论" : "导师评论"}</th>
                   <th />
                 </tr>
               </thead>
@@ -132,6 +133,16 @@ export function TeacherWorkspace({ data }: { data: TeacherDashboard }) {
                           {formatTime(report.submitted_at)}
                         </small>
                       </td>
+                      {isDean ? (
+                        <td
+                          className="mentor-comment-cell"
+                          title={report.mentor_comment ?? undefined}
+                        >
+                          {report.mentor_comment ?? (
+                            <span className="muted-text">暂无评论</span>
+                          )}
+                        </td>
+                      ) : null}
                       <td>
                         {submitted ? (
                           <span

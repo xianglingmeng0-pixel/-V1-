@@ -121,6 +121,12 @@ const mentorComments = [
   "整体工作按计划推进。建议把图表结论进一步量化，并在下月报告中说明改进效果。",
 ] as const;
 
+const deanComments = [
+  "整体研究进展清晰，建议继续保持规范的月度记录，并及时沉淀阶段性成果。",
+  "本月工作安排合理，希望下一阶段加强成果总结，突出研究工作的连续性和创新点。",
+  "已了解本月进展。建议按照导师指导继续推进，并在关键节点及时形成书面成果。",
+] as const;
+
 function getDemoMonthStatus(
   studentIndex: number,
   month: number,
@@ -145,6 +151,7 @@ export function createDemoHistoricalReport(
   studentId: number,
   year: number,
   month: number,
+  viewerRole: "MENTOR" | "DEAN" = "MENTOR",
 ): DemoHistoricalReport | null {
   const now = new Date();
   const studentIndex = demoStudents.findIndex(([id]) => id === studentId);
@@ -161,6 +168,8 @@ export function createDemoHistoricalReport(
     `${year}-${String(month).padStart(2, "0")}-${String(26 + (studentIndex % 3)).padStart(2, "0")}T20:30:00+08:00`,
   );
   const reviewedAt = new Date(submittedAt.getTime() + 18 * 3_600_000);
+  const isDean = viewerRole === "DEAN";
+  const roleComments = isDean ? deanComments : mentorComments;
 
   return {
     student: { id, studentNo, name },
@@ -185,11 +194,10 @@ export function createDemoHistoricalReport(
       status === "COMPLETE"
         ? [
             {
-              author: "龚老师",
+              author: isDean ? "张院长" : "龚老师",
               content:
-                mentorComments[
-                  (studentIndex + month) % mentorComments.length
-                ] ?? mentorComments[0],
+                roleComments[(studentIndex + month) % roleComments.length] ??
+                roleComments[0],
               createdAt: reviewedAt.toISOString(),
             },
           ]
@@ -204,6 +212,11 @@ export function createDemoTeacherDashboard(
   const month = now.getMonth() + 1;
   const deadline = monthDeadline(now.getFullYear(), month);
   const graceDeadline = new Date(deadline.getTime() + 86_400_000);
+  const mentorComments = [
+    "内容已查看，建议下月补充实验对照结果。",
+    "本月进展清晰，请继续完善关键参数说明。",
+    "建议补充误差分析，并整理下一阶段实验计划。",
+  ];
   const reports: TeacherDashboard["reports"] = demoStudents.map(
     ([studentId, studentNo, studentName], index) => {
       const submitted = index < 3;
@@ -225,6 +238,7 @@ export function createDemoTeacherDashboard(
         submitted_at: submitted
           ? new Date(now.getTime() - (index + 1) * 3_600_000).toISOString()
           : null,
+        mentor_comment: submitted ? (mentorComments[index] ?? null) : null,
         comment_count: index === 0 ? 1 : 0,
       };
     },
@@ -238,10 +252,13 @@ export function createDemoTeacherDashboard(
     year: now.getFullYear(),
     month,
     summary: {
-      student_count: demoStudents.length,
-      submitted_count: reports.filter(
-        (report) => report.completion_status === "COMPLETE",
-      ).length,
+      student_count: role === "DEAN" ? 20 : demoStudents.length,
+      submitted_count:
+        role === "DEAN"
+          ? 16
+          : reports.filter(
+              (report) => report.completion_status === "COMPLETE",
+            ).length,
       unread_count: reports.filter(
         (report) =>
           report.completion_status === "COMPLETE" &&
