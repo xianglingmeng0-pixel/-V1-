@@ -1,4 +1,4 @@
--- V2 simplified workflow: one deadline, 24-hour grace period, read receipts,
+-- V1 simplified workflow: one deadline, 24-hour grace period, read receipts,
 -- comments without scores, and student-authorized additional teachers.
 BEGIN;
 

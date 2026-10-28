@@ -1,4 +1,4 @@
--- Rich V2 demonstration data: six students, a dean, an additional teacher,
+-- Rich V1 demonstration data: six students, a dean, an additional teacher,
 -- and a complete twelve-month progress matrix.
 BEGIN;
 
