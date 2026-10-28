@@ -1,4 +1,6 @@
 import type { AnnualProgress, CompletionStatus } from "@yanji/contracts";
+import { Fragment } from "react";
+import { compareStudents } from "../../lib/student-order";
 import { AppHeader } from "./app-header";
 
 const statusLabels: Record<CompletionStatus, string> = {
@@ -13,6 +15,9 @@ export function AnnualProgressTable({ data }: { data: AnnualProgress }) {
   const isDean = data.viewer.role === "DEAN";
   const role = isDean ? "院长" : "导师";
   const base = isDean ? "/dean" : "/mentor";
+  const sortedStudents = [...data.students].sort((left, right) =>
+    compareStudents(left, right, isDean),
+  );
   return (
     <div className="product-shell">
       <AppHeader name={data.viewer.name} role={role} active="annual" />
@@ -69,46 +74,58 @@ export function AnnualProgressTable({ data }: { data: AnnualProgress }) {
                 </tr>
               </thead>
               <tbody>
-                {data.students.map((student) => (
-                  <tr key={student.student_id}>
-                    <td className="sticky-name">
-                      <strong>{student.student_name}</strong>
-                      <small>{student.student_no}</small>
-                    </td>
-                    {isDean ? <td>{student.mentor_name}</td> : null}
-                    {student.months.map((item) => {
-                      const canView = item.status === "COMPLETE";
-                      const label = `${student.student_name}${item.month}月：${statusLabels[item.status]}`;
-                      const content =
-                        item.status === "COMPLETE"
-                          ? "✓"
-                          : item.status === "MISSED"
-                            ? "!"
-                            : "";
-                      return (
-                        <td key={item.month}>
-                          {canView ? (
-                            <a
-                              className="progress-cell complete progress-link"
-                              href={`${base}/history/${student.student_id}-${data.year}-${item.month}`}
-                              title={`${label}，点击查看报告与点评`}
-                              aria-label={`${label}，点击查看报告与点评`}
-                            >
-                              {content}
-                            </a>
-                          ) : (
-                            <span
-                              className={`progress-cell ${item.status.toLowerCase()}`}
-                              title={label}
-                              aria-label={label}
-                            >
-                              {content}
-                            </span>
-                          )}
-                        </td>
-                      );
-                    })}
-                  </tr>
+                {sortedStudents.map((student, index) => (
+                  <Fragment key={student.student_id}>
+                    {isDean &&
+                    (index === 0 ||
+                      sortedStudents[index - 1]?.mentor_name !==
+                        student.mentor_name) ? (
+                      <tr className="mentor-group-row annual-mentor-group">
+                        <td colSpan={14}>{student.mentor_name} · 年度进度</td>
+                      </tr>
+                    ) : null}
+                    <tr>
+                      <td className="sticky-name">
+                        <strong>
+                          {student.student_name}（{student.student_grade}）
+                        </strong>
+                        <small>{student.student_no}</small>
+                      </td>
+                      {isDean ? <td>{student.mentor_name}</td> : null}
+                      {student.months.map((item) => {
+                        const canView = item.status === "COMPLETE";
+                        const label = `${student.student_name}（${student.student_grade}）${item.month}月：${statusLabels[item.status]}`;
+                        const content =
+                          item.status === "COMPLETE"
+                            ? "✓"
+                            : item.status === "MISSED"
+                              ? "!"
+                              : "";
+                        return (
+                          <td key={item.month}>
+                            {canView ? (
+                              <a
+                                className="progress-cell complete progress-link"
+                                href={`${base}/history/${student.student_id}-${data.year}-${item.month}`}
+                                title={`${label}，点击查看报告与点评`}
+                                aria-label={`${label}，点击查看报告与点评`}
+                              >
+                                {content}
+                              </a>
+                            ) : (
+                              <span
+                                className={`progress-cell ${item.status.toLowerCase()}`}
+                                title={label}
+                                aria-label={label}
+                              >
+                                {content}
+                              </span>
+                            )}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  </Fragment>
                 ))}
               </tbody>
             </table>

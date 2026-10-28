@@ -45,7 +45,7 @@ WHERE users.user_no IN ('20260001', 'T0001', 'A0001') AND org_units.code = 'CS';
 INSERT INTO student_profiles (
   user_id, student_no, major_id, class_id, grade, enrollment_year, degree_level
 )
-SELECT student.id, student.user_no, major.id, class.id, '2026',
+SELECT student.id, student.user_no, major.id, class.id, '研二',
        EXTRACT(YEAR FROM CURRENT_DATE)::smallint, 'MASTER'
 FROM users student
 JOIN majors major ON major.code = 'SE'

@@ -10,7 +10,7 @@ export default function StudentTeachersPage() {
           <div>
             <span className="eyebrow">查看权限</span>
             <h1>我的老师</h1>
-            <p>默认导师由学院匹配，你也可以授权其他老师查看自己的月报。</p>
+            <p>注册时填写默认导师，也可以继续添加其他老师查看自己的月报。</p>
           </div>
         </section>
         <section className="simple-card access-manager">

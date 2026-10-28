@@ -1,4 +1,4 @@
--- “研迹”学生—导师系统 PostgreSQL schema V1.0
+-- “112研迹”学生—导师系统 PostgreSQL schema V1.0
 -- Target: PostgreSQL 15+
 
 BEGIN;

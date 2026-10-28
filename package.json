@@ -2,7 +2,7 @@
   "name": "yanji-platform",
   "version": "0.1.0",
   "private": true,
-  "description": "研迹：学生月度成果与导师指导平台",
+  "description": "112研迹：学生月度成果与导师指导平台",
   "license": "Apache-2.0",
   "packageManager": "pnpm@11.28.5",
   "engines": {

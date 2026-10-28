@@ -3,7 +3,7 @@
 import { FormEvent, useState } from "react";
 
 export function TeacherAccessManager() {
-  const [teachers, setTeachers] = useState(["周老师"]);
+  const [teachers, setTeachers] = useState<string[]>([]);
   const [name, setName] = useState("");
   const [message, setMessage] = useState("");
 
@@ -25,7 +25,19 @@ export function TeacherAccessManager() {
             <strong>龚老师</strong>
             <p>默认导师 · 机器学习与科学计算</p>
           </div>
-          <span className="access-badge">查看并评论</span>
+          <a className="access-badge" href="/student/comments#mentor">
+            查看评论
+          </a>
+        </article>
+        <article>
+          <span className="person-avatar dean-avatar">杜</span>
+          <div>
+            <strong>杜院长</strong>
+            <p>院长 · 可查看你的月报和导师评论</p>
+          </div>
+          <a className="access-badge" href="/student/comments#dean">
+            查看评论
+          </a>
         </article>
         {teachers.map((teacher) => (
           <article key={teacher}>
@@ -59,7 +71,7 @@ export function TeacherAccessManager() {
             placeholder="输入老师姓名或工号"
           />
           <button className="primary-button" type="submit">
-            添加查看权限
+            ＋ 添加老师
           </button>
         </div>
         {message ? (

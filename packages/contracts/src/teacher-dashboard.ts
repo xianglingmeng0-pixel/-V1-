@@ -32,6 +32,7 @@ export const teacherDashboardSchema = z.object({
       student_id: z.number().int().positive(),
       student_no: z.string(),
       student_name: z.string(),
+      student_grade: z.string(),
       mentor_name: z.string(),
       title: z.string(),
       completion_status: completionStatusSchema,
@@ -51,6 +52,7 @@ export const annualProgressSchema = z.object({
       student_id: z.number().int().positive(),
       student_no: z.string(),
       student_name: z.string(),
+      student_grade: z.string(),
       mentor_name: z.string(),
       months: z.array(
         z.object({

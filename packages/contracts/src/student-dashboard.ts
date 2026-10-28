@@ -12,6 +12,7 @@ const personSchema = z.object({
 export const studentDashboardSchema = z.object({
   user: personSchema.extend({
     user_no: z.string(),
+    grade: z.string(),
   }),
   current_report: z
     .object({

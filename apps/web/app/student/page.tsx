@@ -42,7 +42,9 @@ export default async function StudentPage() {
             <h1>{dashboard.user.name}，本月只需完成这一件事</h1>
             <p>上传月度成果文件，提交后导师就能直接查看。</p>
           </div>
-          <span className="student-number">{dashboard.user.user_no}</span>
+          <span className="student-number">
+            {dashboard.user.user_no} · {dashboard.user.grade}
+          </span>
         </section>
 
         {report ? (
@@ -88,80 +90,73 @@ export default async function StudentPage() {
           </section>
         ) : null}
 
-        <div className="student-columns">
-          <section className="simple-card process-card">
-            <div className="card-heading">
-              <div>
-                <span className="eyebrow">提交规则</span>
-                <h2>清晰的三步流程</h2>
-              </div>
-            </div>
-            <ol className="simple-process">
-              <li>
-                <span>1</span>
-                <div>
-                  <strong>30日前提交</strong>
-                  <p>上传月度成果文件并确认提交。</p>
-                </div>
-              </li>
-              <li>
-                <span>2</span>
-                <div>
-                  <strong>未提交会短信提醒</strong>
-                  <p>截止时系统自动提醒，给你24小时补交。</p>
-                </div>
-              </li>
-              <li>
-                <span>3</span>
-                <div>
-                  <strong>导师查看并评论</strong>
-                  <p>导师打开后状态会更新，可留下文字建议。</p>
-                </div>
-              </li>
-            </ol>
-          </section>
-
-          <section className="simple-card teacher-card">
+        <div className="student-dashboard-grid">
+          <section className="simple-card teacher-comments-card">
             <div className="card-heading">
               <div>
                 <span className="eyebrow">我的老师</span>
-                <h2>报告查看权限</h2>
+                <h2>查看老师评论</h2>
               </div>
-              <a href="/student/teachers">管理</a>
+              <a className="add-teacher-link" href="/student/teachers">
+                ＋ 添加老师
+              </a>
             </div>
-            <div className="teacher-person">
-              <span className="person-avatar">龚</span>
+            <div className="teacher-comment-list">
+              <article>
+                <span className="person-avatar">龚</span>
+                <div>
+                  <div className="teacher-comment-meta">
+                    <strong>{report?.mentor.name ?? "龚老师"}</strong>
+                    <span>默认导师</span>
+                  </div>
+                  <p>查看龚老师给你的月报建议和历史评论。</p>
+                  <a
+                    className="view-comment-link"
+                    href="/student/comments#mentor"
+                  >
+                    查看评论 <span>→</span>
+                  </a>
+                </div>
+              </article>
+              <article>
+                <span className="person-avatar dean-avatar">杜</span>
+                <div>
+                  <div className="teacher-comment-meta">
+                    <strong>杜院长</strong>
+                    <span>院长</span>
+                  </div>
+                  <p>查看杜院长对你的研究进度留下的评论。</p>
+                  <a
+                    className="view-comment-link"
+                    href="/student/comments#dean"
+                  >
+                    查看评论 <span>→</span>
+                  </a>
+                </div>
+              </article>
+            </div>
+          </section>
+
+          <section className="simple-card announcement-panel">
+            <div className="card-heading">
               <div>
-                <strong>{report?.mentor.name ?? "龚老师"}</strong>
-                <p>{report?.mentor.professional_title} · 默认导师</p>
+                <span className="eyebrow">通知公告</span>
+                <h2>近期消息</h2>
               </div>
-              <span className="access-badge">可查看并评论</span>
             </div>
-            <div className="additional-teacher-note">
-              已授权 {report?.additional_teacher_count ?? 0} 位其他老师查看月报
+            <div className="announcement-rows">
+              {dashboard.announcements.map((item) => (
+                <article key={item.id}>
+                  <span className="announcement-dot" />
+                  <strong>{item.title}</strong>
+                  <time>
+                    {item.publish_at ? formatDate(item.publish_at) : "刚刚"}
+                  </time>
+                </article>
+              ))}
             </div>
           </section>
         </div>
-
-        <section className="simple-card announcement-panel">
-          <div className="card-heading">
-            <div>
-              <span className="eyebrow">通知公告</span>
-              <h2>近期消息</h2>
-            </div>
-          </div>
-          <div className="announcement-rows">
-            {dashboard.announcements.map((item) => (
-              <article key={item.id}>
-                <span className="announcement-dot" />
-                <strong>{item.title}</strong>
-                <time>
-                  {item.publish_at ? formatDate(item.publish_at) : "刚刚"}
-                </time>
-              </article>
-            ))}
-          </div>
-        </section>
       </main>
     </div>
   );

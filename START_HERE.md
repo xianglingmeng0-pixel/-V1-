@@ -1,4 +1,4 @@
-# 从这里开始：研迹 V1 客户试用版
+# 从这里开始：112研迹 V1 客户试用版
 
 ## 这版已经改成什么样
 
@@ -39,7 +39,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\start-demo.ps1
 - 院长端：<http://localhost:3000/dean>
 - 院长年度进度：<http://localhost:3000/dean/annual>
 
-登录页底部提供“导师端”和“院长端”客户演示入口。演示数据包含龚老师、张院长和6名学生。
+登录页底部提供“导师端”和“院长端”客户演示入口。演示数据包含龚老师、杜院长和6名学生。
 
 ## 试用时重点看什么
 

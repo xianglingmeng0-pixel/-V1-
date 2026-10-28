@@ -5,6 +5,7 @@ export interface UserRow {
   id: number;
   user_no: string;
   name: string;
+  grade: string;
 }
 
 export interface CurrentReportRow {
@@ -42,9 +43,13 @@ export class StudentDashboardRepository {
 
   async findUser(userId: number): Promise<UserRow | null> {
     const rows = await this.database.query<UserRow>(
-      `SELECT id::int AS id, user_no, name
+      `SELECT users.id::int AS id, users.user_no, users.name,
+              COALESCE(profile.grade, '未填写') AS grade
        FROM users
-       WHERE id = $1 AND deleted_at IS NULL AND status = 'ACTIVE'`,
+       LEFT JOIN student_profiles profile ON profile.user_id = users.id
+       WHERE users.id = $1
+         AND users.deleted_at IS NULL
+         AND users.status = 'ACTIVE'`,
       [userId],
     );
     return rows[0] ?? null;

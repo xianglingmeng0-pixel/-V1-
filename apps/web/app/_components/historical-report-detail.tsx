@@ -33,7 +33,7 @@ export function HistoricalReportDetail({
   const completed = report.status === "COMPLETE";
   const isDean = viewerRole === "DEAN";
   const base = isDean ? "/dean" : "/mentor";
-  const viewerName = isDean ? "张院长" : "龚老师";
+  const viewerName = isDean ? "杜院长" : "龚老师";
   const viewerLabel = isDean ? "院长" : "导师";
 
   return (
@@ -49,9 +49,12 @@ export function HistoricalReportDetail({
               {isDean ? "全院历史月报" : "历史月报"} · {report.year}年度
             </span>
             <h1>
-              {report.student.name}的{report.month}月成果报告
+              {report.student.name}（{report.student.grade}）的{report.month}
+              月成果报告
             </h1>
-            <p>{report.student.studentNo} · 默认导师 龚老师</p>
+            <p>
+              {report.student.studentNo} · 默认导师 {report.student.mentorName}
+            </p>
             {completed ? (
               <div className="history-meta">
                 <span>

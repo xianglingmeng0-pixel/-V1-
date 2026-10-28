@@ -16,7 +16,7 @@ export function createDemoStudentDashboard(): StudentDashboard {
   const deadline = monthDeadline(now.getFullYear(), now.getMonth() + 1);
   const graceDeadline = new Date(deadline.getTime() + 86_400_000);
   return {
-    user: { id: 1, user_no: "20260001", name: "林晓雨" },
+    user: { id: 1, user_no: "20260001", name: "林晓雨", grade: "研二" },
     current_report: {
       id: 1,
       title: `${now.getFullYear()}年${String(now.getMonth() + 1).padStart(2, "0")}月成果报告`,
@@ -35,7 +35,7 @@ export function createDemoStudentDashboard(): StudentDashboard {
         professional_title: "副教授",
         research_direction: "机器学习与科学计算",
       },
-      additional_teacher_count: 1,
+      additional_teacher_count: 0,
     },
     tasks: [],
     announcements: [
@@ -54,12 +54,12 @@ export function createDemoStudentDashboard(): StudentDashboard {
 }
 
 export const demoStudents = [
-  [1, "20260001", "林晓雨"],
-  [5, "20260002", "陈思远"],
-  [6, "20260003", "赵一诺"],
-  [7, "20260004", "周子涵"],
-  [8, "20260005", "孙嘉宁"],
-  [9, "20260006", "吴桐"],
+  [1, "20260001", "林晓雨", "研二"],
+  [5, "20260002", "陈思远", "大三"],
+  [6, "20260003", "赵一诺", "研一"],
+  [7, "20260004", "周子涵", "研二"],
+  [8, "20260005", "孙嘉宁", "大四"],
+  [9, "20260006", "吴桐", "博一"],
 ] as const;
 
 type DemoMonthStatus =
@@ -70,6 +70,8 @@ export type DemoHistoricalReport = {
     id: number;
     studentNo: string;
     name: string;
+    grade: string;
+    mentorName: string;
   };
   year: number;
   month: number;
@@ -161,7 +163,8 @@ export function createDemoHistoricalReport(
   }
 
   const status = getDemoMonthStatus(studentIndex, month, now.getMonth() + 1);
-  const [id, studentNo, name] = student;
+  const [id, studentNo, name, grade] = student;
+  const mentorName = studentIndex >= 3 ? "周老师" : "龚老师";
   const track = researchTracks[studentIndex] ?? researchTracks[0];
   const milestone = monthlyMilestones[month - 1] ?? monthlyMilestones[0];
   const submittedAt = new Date(
@@ -172,7 +175,7 @@ export function createDemoHistoricalReport(
   const roleComments = isDean ? deanComments : mentorComments;
 
   return {
-    student: { id, studentNo, name },
+    student: { id, studentNo, name, grade, mentorName },
     year,
     month,
     status,
@@ -194,7 +197,7 @@ export function createDemoHistoricalReport(
       status === "COMPLETE"
         ? [
             {
-              author: isDean ? "张院长" : "龚老师",
+              author: isDean ? "杜院长" : "龚老师",
               content:
                 roleComments[(studentIndex + month) % roleComments.length] ??
                 roleComments[0],
@@ -218,14 +221,15 @@ export function createDemoTeacherDashboard(
     "建议补充误差分析，并整理下一阶段实验计划。",
   ];
   const reports: TeacherDashboard["reports"] = demoStudents.map(
-    ([studentId, studentNo, studentName], index) => {
+    ([studentId, studentNo, studentName, studentGrade], index) => {
       const submitted = index < 3;
       return {
         submission_id: 101 + index,
         student_id: studentId,
         student_no: studentNo,
         student_name: studentName,
-        mentor_name: "龚老师",
+        student_grade: studentGrade,
+        mentor_name: role === "DEAN" && index >= 3 ? "周老师" : "龚老师",
         title: `${month}月成果报告`,
         completion_status: submitted
           ? "COMPLETE"
@@ -246,7 +250,7 @@ export function createDemoTeacherDashboard(
   return {
     viewer: {
       id: role === "DEAN" ? 4 : 2,
-      name: role === "DEAN" ? "张院长" : "龚老师",
+      name: role === "DEAN" ? "杜院长" : "龚老师",
       role,
     },
     year: now.getFullYear(),
@@ -256,9 +260,8 @@ export function createDemoTeacherDashboard(
       submitted_count:
         role === "DEAN"
           ? 16
-          : reports.filter(
-              (report) => report.completion_status === "COMPLETE",
-            ).length,
+          : reports.filter((report) => report.completion_status === "COMPLETE")
+              .length,
       unread_count: reports.filter(
         (report) =>
           report.completion_status === "COMPLETE" &&
@@ -280,16 +283,17 @@ export function createDemoAnnualProgress(
   return {
     viewer: {
       id: role === "DEAN" ? 4 : 2,
-      name: role === "DEAN" ? "张院长" : "龚老师",
+      name: role === "DEAN" ? "杜院长" : "龚老师",
       role,
     },
     year: now.getFullYear(),
     students: demoStudents.map(
-      ([studentId, studentNo, studentName], index) => ({
+      ([studentId, studentNo, studentName, studentGrade], index) => ({
         student_id: studentId,
         student_no: studentNo,
         student_name: studentName,
-        mentor_name: "龚老师",
+        student_grade: studentGrade,
+        mentor_name: role === "DEAN" && index >= 3 ? "周老师" : "龚老师",
         months: Array.from({ length: 12 }, (_, monthIndex) => {
           const month = monthIndex + 1;
           return {

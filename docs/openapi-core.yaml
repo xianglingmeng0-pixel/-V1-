@@ -1,6 +1,6 @@
 openapi: 3.1.0
 info:
-  title: 研迹学生—导师系统核心 API
+  title: 112研迹学生—导师系统核心 API
   version: 1.0.0
   description: 月度成果提交、版本管理和导师审核的核心接口契约。
 servers:

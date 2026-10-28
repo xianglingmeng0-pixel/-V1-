@@ -313,6 +313,14 @@ a {
   text-align: center;
   font-size: 11px;
 }
+.register-entry {
+  display: block;
+  margin-top: 17px;
+  color: var(--brand);
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+}
 .demo-entrances {
   display: flex;
   justify-content: center;
@@ -322,6 +330,98 @@ a {
 }
 .demo-entrances a {
   color: var(--brand);
+  font-weight: 700;
+}
+
+/* Registration */
+.registration-page {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  gap: 22px;
+  padding: 42px 20px;
+  background: linear-gradient(145deg, #edf5f0 0%, #f9fbfa 100%);
+}
+.registration-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.registration-brand > span:last-child {
+  display: grid;
+}
+.registration-brand strong {
+  letter-spacing: 0.08em;
+}
+.registration-brand small {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 11px;
+}
+.registration-card {
+  width: min(620px, 100%);
+  padding: 34px 38px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+.registration-card h1 {
+  margin: 8px 0 7px;
+  font-size: 29px;
+}
+.registration-card > p {
+  margin: 0 0 24px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.registration-form {
+  display: grid;
+  gap: 11px;
+}
+.registration-form > label,
+.registration-pair label {
+  display: grid;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 700;
+}
+.registration-form > input,
+.registration-pair input {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 13px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  outline: 0;
+}
+.registration-form > input:focus,
+.registration-pair input:focus {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px var(--brand-soft);
+}
+.registration-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.registration-form .login-primary {
+  margin-top: 6px;
+}
+.registration-card .grade-update-note {
+  margin: 16px 0 8px;
+  padding: 10px 12px;
+  border-radius: 9px;
+  color: var(--muted);
+  background: var(--surface-soft);
+  text-align: center;
+  font-size: 11px;
+}
+.back-to-login {
+  display: block;
+  color: var(--brand);
+  text-align: center;
+  font-size: 12px;
   font-weight: 700;
 }
 
@@ -572,9 +672,10 @@ a {
   color: var(--red);
   background: var(--red-soft);
 }
-.student-columns {
+.student-dashboard-grid {
   display: grid;
-  grid-template-columns: 1.1fr 0.9fr;
+  grid-template-columns: 1.12fr 0.88fr;
+  align-items: end;
   gap: 16px;
   margin-top: 18px;
 }
@@ -647,8 +748,133 @@ a {
   background: var(--surface-soft);
   font-size: 12px;
 }
-.announcement-panel {
-  margin-top: 18px;
+.teacher-comment-list article {
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--line);
+}
+.teacher-comment-list article:last-child {
+  border-bottom: 0;
+}
+.teacher-comment-list article > div {
+  min-width: 0;
+  flex: 1;
+}
+.teacher-comment-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.teacher-comment-meta span {
+  padding: 3px 7px;
+  border-radius: 999px;
+  color: var(--brand-dark);
+  background: var(--brand-soft);
+  font-size: 10px;
+  font-weight: 700;
+}
+.teacher-comment-list p {
+  margin: 7px 0 5px;
+  color: #4f5a55;
+  font-size: 13px;
+  line-height: 1.65;
+}
+.teacher-comment-list small {
+  color: var(--muted);
+  font-size: 10px;
+}
+.view-comment-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--brand);
+  font-size: 12px;
+  font-weight: 700;
+}
+.view-comment-link:hover {
+  color: var(--brand-dark);
+}
+.person-avatar.dean-avatar {
+  color: #7c501d;
+  background: #fff0d9;
+}
+.card-heading .add-teacher-link {
+  padding: 7px 10px;
+  border-radius: 8px;
+  background: var(--brand-soft);
+}
+.student-dashboard-grid .announcement-panel {
+  margin: 0;
+  align-self: end;
+}
+
+/* Student comments */
+.student-comments-main {
+  scroll-behavior: smooth;
+}
+.student-comment-groups {
+  display: grid;
+  gap: 16px;
+}
+.student-comment-group {
+  scroll-margin-top: 92px;
+  overflow: hidden;
+}
+.student-comment-group:target {
+  border-color: #a8cdbf;
+  box-shadow: 0 0 0 3px var(--brand-soft);
+}
+.student-comment-teacher {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-soft);
+}
+.student-comment-teacher > div {
+  min-width: 0;
+  flex: 1;
+}
+.student-comment-teacher p {
+  margin: 3px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+}
+.student-comment-teacher > span:last-child {
+  padding: 5px 8px;
+  border-radius: 999px;
+  color: var(--brand-dark);
+  background: var(--brand-soft);
+  font-size: 10px;
+  font-weight: 700;
+}
+.student-comment-history {
+  padding: 0 22px;
+}
+.student-comment-history article {
+  padding: 18px 0;
+  border-bottom: 1px solid var(--line);
+}
+.student-comment-history article:last-child {
+  border-bottom: 0;
+}
+.student-comment-history article > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+.student-comment-history time {
+  color: var(--muted);
+  font-size: 10px;
+}
+.student-comment-history p {
+  margin: 8px 0 0;
+  color: #4f5a55;
+  font-size: 13px;
+  line-height: 1.7;
 }
 .announcement-rows article {
   display: grid;
@@ -741,7 +967,7 @@ a {
 }
 .summary-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 12px;
   margin-bottom: 18px;
 }
@@ -840,6 +1066,20 @@ a {
 }
 .report-table tbody tr:last-child td {
   border-bottom: 0;
+}
+.report-table tr.mentor-group-row td,
+.annual-table tr.mentor-group-row td {
+  padding: 10px 16px;
+  color: var(--brand-dark);
+  background: #edf6f2;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+}
+.annual-table tr.annual-mentor-group td {
+  position: static;
+  left: auto;
+  z-index: auto;
 }
 .report-table tr.report-unread {
   background: linear-gradient(90deg, var(--red-soft), #fff 30%);
@@ -1508,7 +1748,7 @@ a {
     display: grid;
     gap: 8px;
   }
-  .student-columns {
+  .student-dashboard-grid {
     grid-template-columns: 1fr;
   }
   .teacher-person {
@@ -1550,5 +1790,11 @@ a {
   }
   .login-card {
     padding: 28px 22px;
+  }
+  .registration-card {
+    padding: 28px 22px;
+  }
+  .registration-pair {
+    grid-template-columns: 1fr;
   }
 }

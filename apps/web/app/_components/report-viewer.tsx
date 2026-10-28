@@ -13,7 +13,7 @@ export function ReportViewer({
 }) {
   const isDean = role === "DEAN";
   const commentLabel = isDean ? "院长评论" : "导师评论";
-  const avatarText = isDean ? "张" : "龚";
+  const avatarText = isDean ? "杜" : "龚";
   const [comments, setComments] = useState(
     initialComment ? [initialComment] : ([] as string[]),
   );

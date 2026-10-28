@@ -11,6 +11,7 @@ export interface TeacherReportRow {
   student_id: number;
   student_no: string;
   student_name: string;
+  student_grade: string;
   mentor_name: string;
   title: string;
   completion_status: string;
@@ -24,6 +25,7 @@ export interface AnnualProgressRow {
   student_id: number;
   student_no: string;
   student_name: string;
+  student_grade: string;
   mentor_name: string;
   cycle_month: number | null;
   completion_status: string | null;
@@ -55,6 +57,7 @@ export class TeacherDashboardRepository {
          student.id::int AS student_id,
          student.user_no AS student_no,
          student.name AS student_name,
+         COALESCE(student_profile.grade, '未填写') AS student_grade,
          mentor.name AS mentor_name,
          c.title,
          CASE
@@ -70,6 +73,8 @@ export class TeacherDashboardRepository {
        FROM monthly_submissions s
        JOIN monthly_cycles c ON c.id = s.cycle_id
        JOIN users student ON student.id = s.student_id
+       LEFT JOIN student_profiles student_profile
+         ON student_profile.user_id = student.id
        JOIN users mentor ON mentor.id = s.mentor_id
        LEFT JOIN submission_reads reads
          ON reads.submission_id = s.id AND reads.viewer_id = $1
@@ -88,11 +93,21 @@ export class TeacherDashboardRepository {
        WHERE c.cycle_year = $3
          AND c.cycle_month = $4
          AND ($2 = 'DEAN' OR s.mentor_id = $1)
-       GROUP BY s.id, student.id, mentor.name, c.title, c.deadline_at,
+       GROUP BY s.id, student.id, student_profile.grade, mentor.name,
+                c.title, c.deadline_at,
                 c.grace_deadline_at, reads.submission_id,
                 mentor_comment.content
-       ORDER BY (s.first_submitted_at IS NOT NULL AND reads.submission_id IS NULL) DESC,
-                student.name`,
+       ORDER BY
+         CASE WHEN $2 = 'DEAN' THEN mentor.name ELSE '' END,
+         CASE COALESCE(student_profile.grade, '未填写')
+           WHEN '大一' THEN 1 WHEN '大二' THEN 2
+           WHEN '大三' THEN 3 WHEN '大四' THEN 4
+           WHEN '研一' THEN 5 WHEN '研二' THEN 6 WHEN '研三' THEN 7
+           WHEN '博一' THEN 8 WHEN '博二' THEN 9
+           WHEN '博三' THEN 10 WHEN '博四' THEN 11
+           ELSE 99
+         END,
+         student.name`,
       [userId, role, year, month],
     );
   }
@@ -114,6 +129,7 @@ export class TeacherDashboardRepository {
          student.id::int AS student_id,
          student.user_no AS student_no,
          student.name AS student_name,
+         COALESCE(student_profile.grade, '未填写') AS student_grade,
          mentor.name AS mentor_name,
          c.cycle_month::int AS cycle_month,
          CASE
@@ -127,11 +143,24 @@ export class TeacherDashboardRepository {
          END AS completion_status
        FROM visible_students visible
        JOIN users student ON student.id = visible.student_id
+       LEFT JOIN student_profiles student_profile
+         ON student_profile.user_id = student.id
        JOIN users mentor ON mentor.id = visible.mentor_id
        LEFT JOIN monthly_cycles c ON c.cycle_year = $3
        LEFT JOIN monthly_submissions s
          ON s.cycle_id = c.id AND s.student_id = visible.student_id
-       ORDER BY student.name, c.cycle_month`,
+       ORDER BY
+         CASE WHEN $2 = 'DEAN' THEN mentor.name ELSE '' END,
+         CASE COALESCE(student_profile.grade, '未填写')
+           WHEN '大一' THEN 1 WHEN '大二' THEN 2
+           WHEN '大三' THEN 3 WHEN '大四' THEN 4
+           WHEN '研一' THEN 5 WHEN '研二' THEN 6 WHEN '研三' THEN 7
+           WHEN '博一' THEN 8 WHEN '博二' THEN 9
+           WHEN '博三' THEN 10 WHEN '博四' THEN 11
+           ELSE 99
+         END,
+         student.name,
+         c.cycle_month`,
       [userId, role, year],
     );
   }

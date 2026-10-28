@@ -1,4 +1,8 @@
+"use client";
+
 import type { TeacherDashboard } from "@yanji/contracts";
+import { useEffect } from "react";
+import { rememberSubmissionRead } from "../../lib/report-read-state";
 import { AppHeader } from "./app-header";
 import { ReportViewer } from "./report-viewer";
 
@@ -15,6 +19,11 @@ export function ReportDetailPage({
     data.reports.find((item) => item.submitted_at);
   const role = isDean ? "院长" : "导师";
   const base = isDean ? "/dean" : "/mentor";
+  useEffect(() => {
+    if (report) {
+      rememberSubmissionRead(data.viewer.role, report.submission_id);
+    }
+  }, [data.viewer.role, report]);
   if (!report) return null;
 
   return (
@@ -28,7 +37,8 @@ export function ReportDetailPage({
           <div>
             <span className="eyebrow">已打开 · 自动标记为已查看</span>
             <h1>
-              {report.student_name}的{data.month}月成果报告
+              {report.student_name}（{report.student_grade}）的{data.month}
+              月成果报告
             </h1>
             <p>
               {report.student_no} · 默认导师 {report.mentor_name}

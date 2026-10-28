@@ -23,7 +23,7 @@ export default function LoginPage() {
         <div className="login-brand">
           <span className="brand-mark large">研</span>
           <div>
-            <h1>研迹</h1>
+            <h1>112研迹</h1>
             <p>每月一次提交，导师及时看见</p>
           </div>
         </div>
@@ -82,7 +82,10 @@ export default function LoginPage() {
           <a className="wechat-login" href="/student">
             <span>微</span> 使用微信登录
           </a>
-          <p className="agreement">登录即表示同意学校信息系统使用规范</p>
+          <a className="register-entry" href="/register">
+            首次使用？注册学生账号
+          </a>
+          <p className="agreement">登录即表示同意112研迹用户协议与隐私政策</p>
         </div>
         <div className="demo-entrances" aria-label="演示入口">
           <span>客户演示入口</span>

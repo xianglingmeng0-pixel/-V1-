@@ -1,4 +1,12 @@
+"use client";
+
 import type { TeacherDashboard } from "@yanji/contracts";
+import { Fragment, useEffect, useMemo, useState } from "react";
+import {
+  loadReadSubmissionIds,
+  rememberSubmissionRead,
+} from "../../lib/report-read-state";
+import { compareStudents } from "../../lib/student-order";
 import { AppHeader } from "./app-header";
 
 const completionLabels: Record<string, string> = {
@@ -24,6 +32,35 @@ export function TeacherWorkspace({ data }: { data: TeacherDashboard }) {
   const isDean = data.viewer.role === "DEAN";
   const role = isDean ? "院长" : "导师";
   const base = isDean ? "/dean" : "/mentor";
+  const [locallyReadIds, setLocallyReadIds] = useState<Set<number>>(
+    () => new Set(),
+  );
+  const sortedReports = useMemo(
+    () =>
+      [...data.reports].sort((left, right) =>
+        compareStudents(left, right, isDean),
+      ),
+    [data.reports, isDean],
+  );
+
+  useEffect(() => {
+    setLocallyReadIds(loadReadSubmissionIds(data.viewer.role));
+  }, [data.viewer.role]);
+
+  function isReportRead(report: TeacherDashboard["reports"][number]): boolean {
+    return (
+      report.read_status === "READ" || locallyReadIds.has(report.submission_id)
+    );
+  }
+
+  function markReportRead(submissionId: number): void {
+    setLocallyReadIds(rememberSubmissionRead(data.viewer.role, submissionId));
+  }
+
+  const unreadCount = sortedReports.filter(
+    (report) =>
+      report.completion_status === "COMPLETE" && !isReportRead(report),
+  ).length;
   return (
     <div className="product-shell">
       <AppHeader name={data.viewer.name} role={role} active="monthly" />
@@ -58,13 +95,8 @@ export function TeacherWorkspace({ data }: { data: TeacherDashboard }) {
           </article>
           <article className="summary-alert">
             <span>待查看</span>
-            <strong>{data.summary.unread_count}</strong>
+            <strong>{unreadCount}</strong>
             <small>红色项目</small>
-          </article>
-          <article>
-            <span>未完成</span>
-            <strong>{data.summary.missed_count}</strong>
-            <small>超过补交时间</small>
           </article>
         </section>
 
@@ -72,7 +104,11 @@ export function TeacherWorkspace({ data }: { data: TeacherDashboard }) {
           <div className="table-toolbar">
             <div>
               <h2>本月学生月报</h2>
-              <p>点击已提交的报告即可查看，系统自动记录查看状态。</p>
+              <p>
+                {isDean
+                  ? "先按导师分组，组内按年级排序；打开报告后自动更新查看状态。"
+                  : "学生按年级排序；打开报告后自动更新查看状态。"}
+              </p>
             </div>
             <div className="legend-inline">
               <span>
@@ -99,79 +135,95 @@ export function TeacherWorkspace({ data }: { data: TeacherDashboard }) {
                 </tr>
               </thead>
               <tbody>
-                {data.reports.map((report) => {
+                {sortedReports.map((report, index) => {
                   const submitted = report.completion_status === "COMPLETE";
-                  const unread = submitted && report.read_status === "UNREAD";
+                  const unread = submitted && !isReportRead(report);
+                  const beginsMentorGroup =
+                    isDean &&
+                    (index === 0 ||
+                      sortedReports[index - 1]?.mentor_name !==
+                        report.mentor_name);
                   return (
-                    <tr
-                      key={report.submission_id}
-                      className={
-                        unread
-                          ? "report-unread"
-                          : submitted
-                            ? "report-read"
-                            : ""
-                      }
-                    >
-                      <td>
-                        <div className="student-cell">
-                          <span>{report.student_name.slice(0, 1)}</span>
-                          <div>
-                            <strong>{report.student_name}</strong>
-                            <small>{report.student_no}</small>
+                    <Fragment key={report.submission_id}>
+                      {beginsMentorGroup ? (
+                        <tr className="mentor-group-row">
+                          <td colSpan={7}>{report.mentor_name} · 学生列表</td>
+                        </tr>
+                      ) : null}
+                      <tr
+                        className={
+                          unread
+                            ? "report-unread"
+                            : submitted
+                              ? "report-read"
+                              : ""
+                        }
+                      >
+                        <td>
+                          <div className="student-cell">
+                            <span>{report.student_name.slice(0, 1)}</span>
+                            <div>
+                              <strong>
+                                {report.student_name}（{report.student_grade}）
+                              </strong>
+                              <small>{report.student_no}</small>
+                            </div>
                           </div>
-                        </div>
-                      </td>
-                      {isDean ? <td>{report.mentor_name}</td> : null}
-                      <td>
-                        <span
-                          className={`completion-tag completion-${report.completion_status.toLowerCase()}`}
-                        >
-                          {completionLabels[report.completion_status]}
-                        </span>
-                        <small className="submitted-time">
-                          {formatTime(report.submitted_at)}
-                        </small>
-                      </td>
-                      {isDean ? (
-                        <td
-                          className="mentor-comment-cell"
-                          title={report.mentor_comment ?? undefined}
-                        >
-                          {report.mentor_comment ?? (
-                            <span className="muted-text">暂无评论</span>
+                        </td>
+                        {isDean ? <td>{report.mentor_name}</td> : null}
+                        <td>
+                          <span
+                            className={`completion-tag completion-${report.completion_status.toLowerCase()}`}
+                          >
+                            {completionLabels[report.completion_status]}
+                          </span>
+                          <small className="submitted-time">
+                            {formatTime(report.submitted_at)}
+                          </small>
+                        </td>
+                        {isDean ? (
+                          <td
+                            className="mentor-comment-cell"
+                            title={report.mentor_comment ?? undefined}
+                          >
+                            {report.mentor_comment ?? (
+                              <span className="muted-text">暂无评论</span>
+                            )}
+                          </td>
+                        ) : null}
+                        <td>
+                          {submitted ? (
+                            <span
+                              className={`read-tag ${unread ? "unread" : "read"}`}
+                            >
+                              {unread ? "未查看" : "已查看"}
+                            </span>
+                          ) : (
+                            <span className="muted-text">—</span>
                           )}
                         </td>
-                      ) : null}
-                      <td>
-                        {submitted ? (
-                          <span
-                            className={`read-tag ${unread ? "unread" : "read"}`}
-                          >
-                            {unread ? "未查看" : "已查看"}
-                          </span>
-                        ) : (
-                          <span className="muted-text">—</span>
-                        )}
-                      </td>
-                      <td>
-                        {report.comment_count
-                          ? `${report.comment_count}条`
-                          : "—"}
-                      </td>
-                      <td>
-                        {submitted ? (
-                          <a
-                            className="row-action"
-                            href={`${base}/reports/${report.submission_id}`}
-                          >
-                            查看报告
-                          </a>
-                        ) : (
-                          <span className="muted-text">等待学生</span>
-                        )}
-                      </td>
-                    </tr>
+                        <td>
+                          {report.comment_count
+                            ? `${report.comment_count}条`
+                            : "—"}
+                        </td>
+                        <td>
+                          {submitted ? (
+                            <a
+                              className="row-action"
+                              href={`${base}/reports/${report.submission_id}`}
+                              onClick={() =>
+                                markReportRead(report.submission_id)
+                              }
+                            >
+                              查看报告
+                            </a>
+                          ) : (
+                            <span className="muted-text">等待学生</span>
+                          )}
+                        </td>
+                      </tr>
+                    </Fragment>
                   );
                 })}
               </tbody>

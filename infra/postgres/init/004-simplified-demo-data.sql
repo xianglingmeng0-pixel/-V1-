@@ -3,7 +3,7 @@
 BEGIN;
 
 INSERT INTO users (user_no, name, status) VALUES
-  ('D0001', '张院长', 'ACTIVE'),
+  ('D0001', '杜院长', 'ACTIVE'),
   ('20260002', '陈思远', 'ACTIVE'),
   ('20260003', '赵一诺', 'ACTIVE'),
   ('20260004', '周子涵', 'ACTIVE'),
@@ -39,7 +39,14 @@ AND org.code = 'CS';
 INSERT INTO student_profiles (
   user_id, student_no, major_id, class_id, grade, enrollment_year, degree_level
 )
-SELECT students.id, students.user_no, major.id, class.id, '2026',
+SELECT students.id, students.user_no, major.id, class.id,
+       CASE students.user_no
+         WHEN '20260002' THEN '大三'
+         WHEN '20260003' THEN '研一'
+         WHEN '20260004' THEN '研二'
+         WHEN '20260005' THEN '大四'
+         ELSE '博一'
+       END,
        EXTRACT(YEAR FROM CURRENT_DATE)::smallint, 'MASTER'
 FROM users students
 JOIN majors major ON major.code = 'SE'

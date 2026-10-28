@@ -16,7 +16,7 @@ export function AppHeader({
       <a className="brand" href={isStudent ? "/student" : base}>
         <span className="brand-mark">研</span>
         <span>
-          <strong>研迹</strong>
+          <strong>112研迹</strong>
           <small>月度成果</small>
         </span>
       </a>

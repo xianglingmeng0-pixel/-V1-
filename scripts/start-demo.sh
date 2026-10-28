@@ -15,7 +15,7 @@ fi
 docker compose -f compose.demo.yml up --build -d
 
 echo ""
-echo "研迹演示系统正在启动。首次构建通常需要几分钟。"
+echo "112研迹演示系统正在启动。首次构建通常需要几分钟。"
 echo "查看状态：docker compose -f compose.demo.yml ps"
 echo "查看日志：docker compose -f compose.demo.yml logs -f"
 echo "登录页：http://localhost:3000/login"

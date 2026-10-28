@@ -75,6 +75,7 @@ export class TeacherDashboardService {
         student_id: number;
         student_no: string;
         student_name: string;
+        student_grade: string;
         mentor_name: string;
         months: Array<{ month: number; status: string }>;
       }
@@ -85,6 +86,7 @@ export class TeacherDashboardService {
         student_id: row.student_id,
         student_no: row.student_no,
         student_name: row.student_name,
+        student_grade: row.student_grade,
         mentor_name: row.mentor_name,
         months: [],
       };
