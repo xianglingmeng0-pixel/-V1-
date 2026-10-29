@@ -10,7 +10,7 @@ describe("StudentDashboardService", () => {
         id: 1,
         user_no: "20260001",
         name: "林晓雨",
-        grade: "研二",
+        grade: "大三",
       }),
       findCurrentReport: vi.fn().mockResolvedValue({
         id: 7,

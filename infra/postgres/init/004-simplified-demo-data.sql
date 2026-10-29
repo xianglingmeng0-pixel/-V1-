@@ -41,10 +41,10 @@ INSERT INTO student_profiles (
 )
 SELECT students.id, students.user_no, major.id, class.id,
        CASE students.user_no
-         WHEN '20260002' THEN '大三'
-         WHEN '20260003' THEN '研一'
+         WHEN '20260002' THEN '研二'
+         WHEN '20260003' THEN '大四'
          WHEN '20260004' THEN '研二'
-         WHEN '20260005' THEN '大四'
+         WHEN '20260005' THEN '研一'
          ELSE '博一'
        END,
        EXTRACT(YEAR FROM CURRENT_DATE)::smallint, 'MASTER'

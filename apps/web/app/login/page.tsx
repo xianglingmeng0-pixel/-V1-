@@ -1,3 +1,5 @@
+import { WechatScanLogin } from "./wechat-scan-login";
+
 const notices = [
   {
     date: "10-28",
@@ -29,7 +31,6 @@ export default function LoginPage() {
         </div>
         <div className="notice-title">
           <span>通知公告</span>
-          <small>无需登录即可查看</small>
         </div>
         <div className="notice-cards">
           {notices.map((notice, index) => (
@@ -79,9 +80,7 @@ export default function LoginPage() {
           <div className="or-divider">
             <span>或</span>
           </div>
-          <a className="wechat-login" href="/student">
-            <span>微</span> 使用微信登录
-          </a>
+          <WechatScanLogin />
           <a className="register-entry" href="/register">
             首次使用？注册学生账号
           </a>

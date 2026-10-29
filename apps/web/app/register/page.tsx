@@ -37,7 +37,7 @@ export default function RegisterPage() {
               <input
                 name="grade"
                 list="grade-options"
-                defaultValue="研二"
+                defaultValue="大三"
                 placeholder="如：大三、研二"
                 required
               />

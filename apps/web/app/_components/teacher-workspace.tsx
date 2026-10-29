@@ -71,11 +71,7 @@ export function TeacherWorkspace({ data }: { data: TeacherDashboard }) {
               {data.year}年 {data.month}月
             </span>
             <h1>{isDean ? "全院月报概览" : "学生月报工作台"}</h1>
-            <p>
-              {isDean
-                ? "查看所有导师及其学生的月报进展。"
-                : "红色表示学生已提交但你还没看，打开后自动变为绿色。"}
-            </p>
+            {isDean ? <p>查看所有导师及其学生的月报进展。</p> : null}
           </div>
           <a className="secondary-button" href={`${base}/annual`}>
             查看年度进度表 <span>→</span>

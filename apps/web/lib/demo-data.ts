@@ -16,7 +16,7 @@ export function createDemoStudentDashboard(): StudentDashboard {
   const deadline = monthDeadline(now.getFullYear(), now.getMonth() + 1);
   const graceDeadline = new Date(deadline.getTime() + 86_400_000);
   return {
-    user: { id: 1, user_no: "20260001", name: "林晓雨", grade: "研二" },
+    user: { id: 1, user_no: "20260001", name: "林晓雨", grade: "大三" },
     current_report: {
       id: 1,
       title: `${now.getFullYear()}年${String(now.getMonth() + 1).padStart(2, "0")}月成果报告`,
@@ -54,11 +54,11 @@ export function createDemoStudentDashboard(): StudentDashboard {
 }
 
 export const demoStudents = [
-  [1, "20260001", "林晓雨", "研二"],
-  [5, "20260002", "陈思远", "大三"],
-  [6, "20260003", "赵一诺", "研一"],
+  [1, "20260001", "林晓雨", "大三"],
+  [5, "20260002", "陈思远", "研二"],
+  [6, "20260003", "赵一诺", "大四"],
   [7, "20260004", "周子涵", "研二"],
-  [8, "20260005", "孙嘉宁", "大四"],
+  [8, "20260005", "孙嘉宁", "研一"],
   [9, "20260006", "吴桐", "博一"],
 ] as const;
 

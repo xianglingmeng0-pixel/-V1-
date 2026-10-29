@@ -39,7 +39,7 @@ export default async function StudentPage() {
         <section className="welcome-row">
           <div>
             <span className="eyebrow">学生月度成果</span>
-            <h1>{dashboard.user.name}，本月只需完成这一件事</h1>
+            <h1>{dashboard.user.name}</h1>
             <p>上传月度成果文件，提交后导师就能直接查看。</p>
           </div>
           <span className="student-number">

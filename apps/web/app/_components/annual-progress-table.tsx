@@ -26,11 +26,7 @@ export function AnnualProgressTable({ data }: { data: AnnualProgress }) {
           <div>
             <span className="eyebrow">全年追踪</span>
             <h1>{data.year}年度月报进度</h1>
-            <p>
-              {isDean
-                ? "按导师查看全院学生12个月的完成情况。"
-                : "一张表看清每位学生全年12个月的完成情况。"}
-            </p>
+            {isDean ? <p>按导师查看全院学生12个月的完成情况。</p> : null}
           </div>
           <a className="secondary-button" href={base}>
             ← 返回月报工作台
