@@ -29,7 +29,7 @@
     "@types/node": "^24.10.0",
     "@types/pg": "^8.15.5",
     "typescript": "^5.9.3",
-    "vitest": "^4.0.0",
+    "vitest": "^5.0.5",
     "webpack": "^5.112.0"
   }
 }
